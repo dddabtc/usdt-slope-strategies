@@ -32,6 +32,8 @@ PAGE = """<!DOCTYPE html>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; padding: 12px; }
 h1 { font-size: 17px; margin-bottom: 6px; color: #58a6ff; line-height: 1.3; }
+.back { display: inline-block; font-size: 13px; color: #8b949e; text-decoration: none; margin-bottom: 10px; padding: 4px 10px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; }
+.back:active, .back:hover { color: #58a6ff; border-color: #58a6ff; }
 h2 { font-size: 14px; margin: 16px 0 8px; color: #8b949e; }
 .meta { font-size: 12px; color: #8b949e; margin-bottom: 12px; }
 .notice { background: #211a0d; border: 1px solid #9e6a03; color: #f0c674; padding: 10px 12px; border-radius: 8px; margin: 10px 0 12px; font-size: 12px; line-height: 1.45; }
@@ -50,6 +52,7 @@ tr.rec-row { background: #0f2418; }
 </style>
 </head>
 <body>
+<a class="back" href="index.html">← 返回总览 · All Strategies</a>
 <h1>Leverage Sweep — Long-Only vs Long/Short</h1>
 <div class="meta">__META__</div>
 __REC__

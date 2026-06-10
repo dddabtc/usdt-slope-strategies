@@ -78,6 +78,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; padding: 12px; }
 h1 { font-size: 17px; margin-bottom: 6px; color: #58a6ff; line-height: 1.3; }
+.back { display: inline-block; font-size: 13px; color: #8b949e; text-decoration: none; margin-bottom: 10px; padding: 4px 10px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; }
+.back:active, .back:hover { color: #58a6ff; border-color: #58a6ff; }
 .meta { font-size: 12px; color: #8b949e; margin-bottom: 12px; }
 #chart { width: 100%; height: 400px; min-height: 320px; }
 #controls { margin: 10px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -127,6 +129,7 @@ h1 { font-size: 17px; margin-bottom: 6px; color: #58a6ff; line-height: 1.3; }
 </style>
 </head>
 <body>
+<a class="back" href="index.html">← 返回总览 · All Strategies</a>
 <h1>__TITLE__</h1>
 <div class="meta">__META__</div>
 __NOTICE__

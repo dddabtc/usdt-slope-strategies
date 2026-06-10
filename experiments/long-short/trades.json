@@ -564,18 +564,18 @@
     "side": "SHORT",
     "entry_signal_date": "2026-03-19",
     "buy_date": "2026-03-19",
-    "exit_signal_date": "2026-03-19",
-    "sell_date": "2026-03-19",
+    "exit_signal_date": "2026-03-22",
+    "sell_date": "2026-03-22",
     "buy_price": 69918.84,
-    "sell_price": 69918.84,
-    "raw_return_pct": 0.0,
-    "return_pct": -0.3,
-    "hold_days": 0,
-    "exit_reason": "open",
+    "sell_price": 68733.55,
+    "raw_return_pct": -1.7,
+    "return_pct": 4.79,
+    "hold_days": 3,
+    "exit_reason": "slope_positive",
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 367621.33
+    "capital_after": 386373.78
   },
   {
     "side": "LONG",
@@ -592,8 +592,7 @@
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 11456.81,
-    "phase": "Post-benchmark"
+    "capital_after": 442660.91
   },
   {
     "side": "LONG",
@@ -610,7 +609,6 @@
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 10904.05,
-    "phase": "Post-benchmark"
+    "capital_after": 421303.99
   }
 ]

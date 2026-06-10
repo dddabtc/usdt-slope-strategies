@@ -81,28 +81,34 @@ Both bounds are pinned to the original repo's frozen artifacts by
 
 ## 4. Headline results (immediate execution + costs)
 
-Frozen benchmark window 2021-09-27 → 2026-03-19, BTC buy & hold +65.7%.
-Fees and funding included. Daily Sharpe, daily max drawdown.
+Evaluation window 2021-09-27 → latest settled bar (refreshed daily by the
+cron; parameters are frozen so extending the window adds data, not fitting).
+As of 2026-06-09: BTC buy & hold +46.2%. Fees and funding included. Daily
+Sharpe, daily max drawdown.
 
 **Long-Only** (frozen V27 entry/exit):
 
-| Leverage | Return | Ann. | Sharpe | Max DD | Win Rate | Trades |
-|----------|--------|------|--------|--------|----------|--------|
-| 1.0x | +282% | +34.9% | 1.89 | −8.1% | 68% | 28 |
-| 2.0x | +1,121% | +74.8% | 1.89 | −15.8% | 68% | 28 |
-| **3.0x (recommended)** | **+3,299%** | **+119.7%** | **1.89** | **−23.2%** | **68%** | **28** |
+| Leverage | Return | Ann. | Sharpe | Max DD | Trades |
+|----------|--------|------|--------|--------|--------|
+| 1.0x | +294% | +33.8% | 1.86 | −8.1% | 30 |
+| 2.0x | +1,196% | +72.3% | 1.86 | −15.8% | 30 |
+| **3.0x (recommended)** | **+3,606%** | **+115.4%** | **1.86** | **−23.2%** | **30 (WR 67%)** |
 
 **Long/Short** (V27 longs + mirrored regime-gated shorts):
 
-| Leverage | Return | Ann. | Sharpe | Max DD | Win Rate | Trades |
-|----------|--------|------|--------|--------|----------|--------|
-| 1.0x | +295% | +35.9% | 1.73 | −9.6% | 65% | 34 (28L/6S) |
-| 2.0x | +1,196% | +77.2% | 1.73 | −19.2% | 65% | 34 |
-| **3.0x (recommended)** | **+3,576%** | **+123.6%** | **1.73** | **−28.7%** | **65%** | **34** |
+| Leverage | Return | Ann. | Sharpe | Max DD | Trades |
+|----------|--------|------|--------|--------|--------|
+| 1.0x | +315% | +35.3% | 1.72 | −9.6% | 36 (30L/6S) |
+| 2.0x | +1,323% | +75.8% | 1.73 | −19.2% | 36 |
+| **3.0x (recommended)** | **+4,114%** | **+121.4%** | **1.73** | **−28.7%** | **36 (WR 67%)** |
 
-Worst-case bound for reference (wait 24h, costs included): long-only
-+76.8% @1x / +319.2% @3x; long/short +79.6% @1x / +254.9% @2.5x — still
-comfortably above buy & hold.
+Frozen-window reference (→2026-03-19, comparable to the original repo):
+long-only 3x +3,299%, long/short 3x +3,576%. Worst-case execution bound
+(wait 24h, frozen window): long-only +76.8% @1x — still above buy & hold.
+Note the protocol difference on shorts: with frozen params over the full
+window the short book is net positive (the 2026 contraction trades), while
+under per-fold re-selection (open search) shorts added nothing — both
+statements hold in their own protocol.
 
 The short book is small by construction — USDT market cap rarely contracts
 (2022 was the only sustained episode). Its value is regime coverage: the

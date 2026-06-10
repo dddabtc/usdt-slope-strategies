@@ -124,11 +124,12 @@ def table_html(df, rec_lev, title):
 def main():
     OUTDIR.mkdir(parents=True, exist_ok=True)
     data = load_full_data()
+    latest = min(data["btc"]["date"].max(), data["usdt"]["date"].max())
     results, recs, tables = {}, {}, ""
     for mode in [LONG_ONLY, LONG_SHORT]:
-        print(f"\n=== sweep {mode} ===")
+        print(f"\n=== sweep {mode} (to {latest.date()}) ===")
         cfg = StrategyConfig(mode=mode)
-        df = sweep(data, cfg)
+        df = sweep(data, cfg, eval_end=latest)
         rec = recommend(df)
         results[mode] = df
         recs[mode] = rec
@@ -162,7 +163,7 @@ def main():
         f'long/short {kelly_str(LONG_SHORT)}. '
         f'Rule: {recs[LONG_ONLY]["rule"]}.</div>'
     )
-    page = PAGE.replace("__META__", f"Benchmark window: {TRAIN_END.date()} → {BENCHMARK_TEST_END.date()} · immediate execution · grid 0.5–6.0x · 10,000 bootstrap resamples")
+    page = PAGE.replace("__META__", f"Evaluation: {TRAIN_END.date()} → {latest.date()} (frozen params) · immediate execution · grid 0.5–6.0x · 10,000 bootstrap resamples")
     page = page.replace("__REC__", rec_html)
     page = page.replace("__TABLES__", tables)
     page = page.replace("__SWEEPS__", json.dumps(sweeps_js))

@@ -493,12 +493,14 @@ def trade_metrics(trades: list[dict]) -> dict:
 
 def backtest(data: dict, config: StrategyConfig = DEFAULT_CONFIG,
              eval_start: pd.Timestamp = TRAIN_END,
-             eval_end: pd.Timestamp = BENCHMARK_TEST_END) -> dict:
+             eval_end: pd.Timestamp = BENCHMARK_TEST_END,
+             right_censor_open: bool = False) -> dict:
     """Full backtest over [eval_start, eval_end] with signals built from
     research_start so warm-up windows match the original repo exactly."""
     bdata = slice_data_window(data, RESEARCH_START, eval_end)
     signals = generate_signals(bdata, config)
-    trades, merged = collect_trades(signals, bdata["btc"], config, _ts(eval_start), _ts(eval_end))
+    trades, merged = collect_trades(signals, bdata["btc"], config, _ts(eval_start), _ts(eval_end),
+                                    right_censor_open=right_censor_open)
     equity = daily_equity_curve(merged, trades, config)
     bh = float(merged["price"].iloc[-1] / merged["price"].iloc[0] - 1.0) if not merged.empty else 0.0
     metrics = {**equity_metrics(equity, config.initial_capital), **trade_metrics(trades)}

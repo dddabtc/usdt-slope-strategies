@@ -490,8 +490,7 @@
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 11456.81,
-    "phase": "Post-benchmark"
+    "capital_after": 389358.79
   },
   {
     "side": "LONG",
@@ -508,7 +507,6 @@
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 10904.05,
-    "phase": "Post-benchmark"
+    "capital_after": 370573.51
   }
 ]

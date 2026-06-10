@@ -38,17 +38,11 @@ TITLES = {
 }
 
 
-def notice_html(cfg: StrategyConfig, m: dict, post: list[dict]) -> str:
-    post_line = ""
-    if post:
-        parts = []
-        for t in post:
-            if t.get("status") == "OPEN":
-                parts.append(f'{t["side"]} signal {t["entry_signal_date"]}→entry {t["buy_date"]} OPEN')
-            else:
-                parts.append(f'{t["side"]} {t["buy_date"]}→{t["sell_date"]} {t["return_pct"]:+.1f}%')
-        post_line = (' <strong>Post-benchmark overlay (not in headline):</strong> '
-                     + '; '.join(parts) + '.')
+def notice_html(cfg: StrategyConfig, m: dict, frozen_m: dict, open_trades: list[dict]) -> str:
+    open_line = ""
+    if open_trades:
+        parts = [f'{t["side"]} since {t["buy_date"]} @ ${t["buy_price"]:,.0f} (OPEN)' for t in open_trades]
+        open_line = ' <strong>Current position:</strong> ' + '; '.join(parts) + '.'
     short_line = ""
     if cfg.mode == LONG_SHORT:
         short_line = (' Shorts mirror every long rule (lower Bollinger band / contraction regime, '
@@ -62,11 +56,13 @@ def notice_html(cfg: StrategyConfig, m: dict, post: list[dict]) -> str:
         'conservative bound) still leaves the strategy profitable — see README for the decay table. '
         'Parameters are the frozen canonical V27 set from '
         '<a href="https://github.com/dddabtc/usdt-slope-research" style="color:#ffd866">usdt-slope-research</a>, '
-        'verified trade-for-trade and not re-fitted. Costs included: 5 bps/side fee+slippage and 3 bps/day '
+        'verified trade-for-trade and not re-fitted — so the evaluation window runs to the latest settled '
+        'bar and is refreshed daily. Costs included: 5 bps/side fee+slippage and 3 bps/day '
         f'long funding on {cfg.leverage:g}x notional; close-based isolated-margin liquidation modeled '
-        f'(none occurred). Headline metrics are frozen at {BENCHMARK_TEST_END.date()};'
-        f' BTC buy&hold over the same window: {m["btc_buy_hold_return"]*100:+.1f}%.'
-        + short_line + post_line +
+        f'(none occurred). BTC buy&hold over the same window: {m["btc_buy_hold_return"]*100:+.1f}%. '
+        f'Frozen-window reference (→{BENCHMARK_TEST_END.date()}, comparable to the original repo): '
+        f'{frozen_m["total_return"]*100:+.1f}%.'
+        + short_line + open_line +
         ' Past performance does not guarantee future results.</div>'
     )
 
@@ -74,14 +70,16 @@ def notice_html(cfg: StrategyConfig, m: dict, post: list[dict]) -> str:
 def run_mode(data: dict, mode: str, leverage: float | None) -> dict:
     lev = leverage if leverage is not None else RECOMMENDED[mode]
     cfg = StrategyConfig(mode=mode, leverage=lev)
-    result = backtest(data, cfg, TRAIN_END, BENCHMARK_TEST_END)
+    latest = min(data["btc"]["date"].max(), data["usdt"]["date"].max())
+    result = backtest(data, cfg, TRAIN_END, latest, right_censor_open=True)
     m = result["metrics"]
-    post = post_benchmark_trades(data, cfg)
+    frozen_m = backtest(data, cfg, TRAIN_END, BENCHMARK_TEST_END)["metrics"]
+    open_trades = [t for t in result["trades"] if t.get("status") == "OPEN"]
 
     exp_dir = OUTDIR / mode.replace("_", "-")
     exp_dir.mkdir(parents=True, exist_ok=True)
     result["equity"].to_csv(exp_dir / "equity.csv", index=False)
-    (exp_dir / "trades.json").write_text(json.dumps(result["trades"] + post, indent=2))
+    (exp_dir / "trades.json").write_text(json.dumps(result["trades"], indent=2))
     ledger_entry = {
         "phase": f"headline_{mode}",
         "params": {k: v for k, v in cfg.__dict__.items() if k != "extra"},
@@ -91,8 +89,7 @@ def run_mode(data: dict, mode: str, leverage: float | None) -> dict:
     with open(exp_dir / "ledger.jsonl", "w") as f:
         f.write(json.dumps(ledger_entry, default=str) + "\n")
 
-    # chart frame over the full research window incl. post-benchmark
-    latest = min(data["btc"]["date"].max(), data["usdt"]["date"].max())
+    # chart frame over the full research window
     bdata = slice_data_window(data, RESEARCH_START, latest)
     mc = bdata["usdt"][["date", "market_cap"]].rename(columns={"market_cap": "usdt_mcap"})
     kdf = build_kalman(bdata["usdt"])
@@ -101,18 +98,16 @@ def run_mode(data: dict, mode: str, leverage: float | None) -> dict:
                 .merge(kdf, on="date", how="left")
                 .sort_values("date").reset_index(drop=True))
 
-    display_trades = [{**t, "phase": "Benchmark"} for t in result["trades"]] + post
-    meta = (f"OOS: {TRAIN_END.date()} to {BENCHMARK_TEST_END.date()} · {m['n_trades']} trades "
-            f"(L{m['n_long']}/S{m['n_short']}) · {cfg.leverage:g}x leverage · immediate execution "
-            f"· data to {latest.date()}")
+    meta = (f"Evaluation: {TRAIN_END.date()} → {latest.date()} (frozen params) · {m['n_trades']} trades "
+            f"(L{m['n_long']}/S{m['n_short']}) · {cfg.leverage:g}x leverage · immediate execution")
     page_name = f"visualization_{mode}.html"
-    generate_page(chart_df, display_trades, m, TITLES[mode], meta,
-                  notice_html(cfg, m, post), DOCS / page_name)
+    generate_page(chart_df, result["trades"], m, TITLES[mode], meta,
+                  notice_html(cfg, m, frozen_m, open_trades), DOCS / page_name)
 
     print(f"{mode} @{cfg.leverage:g}x: ret {m['total_return']*100:+.1f}%  sharpe {m['daily_sharpe']:.2f}  "
           f"dd {m['max_drawdown']*100:.1f}%  trades {m['n_trades']} (L{m['n_long']}/S{m['n_short']})  "
-          f"wr {m['win_rate']*100:.0f}%  bh {m['btc_buy_hold_return']*100:+.1f}%  post-trades {len(post)}")
-    return {"metrics": m, "config": cfg, "post": post, "page": page_name}
+          f"wr {m['win_rate']*100:.0f}%  bh {m['btc_buy_hold_return']*100:+.1f}%  open {len(open_trades)}")
+    return {"metrics": m, "config": cfg, "page": page_name, "latest": latest}
 
 
 INDEX_TEMPLATE = """<!DOCTYPE html>
@@ -144,7 +139,7 @@ h1{font-size:1.8em;margin-bottom:8px;color:#58a6ff}
 </head>
 <body>
 <h1>USDT Slope Strategies</h1>
-<p class="subtitle">Frozen benchmark: __WINDOW__ · immediate execution at 00:00 UTC snapshots · fees &amp; funding included<br>BTC buy&amp;hold same window: __BH__</p>
+<p class="subtitle">Evaluation: __WINDOW__ · frozen params, refreshed daily · immediate execution at 00:00 UTC snapshots · fees &amp; funding included<br>BTC buy&amp;hold same window: __BH__</p>
 <div class="cards">
 __CARDS__
 </div>
@@ -217,7 +212,7 @@ def write_index(results: dict, latest: str) -> None:
 """
     m0 = results[LONG_ONLY]["metrics"]
     html = INDEX_TEMPLATE.replace("__CARDS__", cards)
-    html = html.replace("__WINDOW__", f"{TRAIN_END.date()} → {BENCHMARK_TEST_END.date()}")
+    html = html.replace("__WINDOW__", f"{TRAIN_END.date()} → {latest}")
     html = html.replace("__BH__", f"{m0['btc_buy_hold_return']*100:+.1f}%")
     html = html.replace("__LATEST__", latest)
     (DOCS / "index.html").write_text(html)

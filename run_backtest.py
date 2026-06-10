@@ -186,7 +186,17 @@ def write_index(results: dict, latest: str) -> None:
         card = card.replace("__LEV__", f"{results[mode]['config'].leverage:g}x")
         cards += card
 
-    cards += """<a href="visualization_leverage.html" class="card">
+    cards += """<a href="visualization_open_search.html" class="card">
+  <h2>Open Search · 开放式最佳策略验证</h2>
+  <div class="return">F3 wins</div>
+  <div class="stats">
+    <div class="stat"><span class="label">8/8 折</span><br><span class="val">全正 OOS</span></div>
+    <div class="stat"><span class="label">Sharpe</span><br><span class="val">1.68</span></div>
+    <div class="stat"><span class="label">vs 零检验</span><br><span class="val">胜 12/12</span></div>
+    <div class="stat"><span class="label">Max DD</span><br><span class="val">-8.1%</span></div>
+  </div>
+</a>
+<a href="visualization_leverage.html" class="card">
   <h2>Leverage Sweep · 最佳杠杆</h2>
   <div class="return mid">0.5–6.0x</div>
   <div class="stats">

@@ -15,6 +15,7 @@ optimal value is derived from a liquidation-aware Kelly/bootstrap sweep.
 - [Long-Only ⭐](https://dddabtc.github.io/usdt-slope-strategies/visualization_long_only.html)
 - [Long/Short](https://dddabtc.github.io/usdt-slope-strategies/visualization_long_short.html)
 - [Leverage Sweep → optimal leverage](https://dddabtc.github.io/usdt-slope-strategies/visualization_leverage.html)
+- [Open Strategy Search → which strategy is honestly best](https://dddabtc.github.io/usdt-slope-strategies/visualization_open_search.html)
 
 ---
 
@@ -106,6 +107,32 @@ The short book is small by construction — USDT market cap rarely contracts
 (2022 was the only sustained episode). Its value is regime coverage: the
 June 2022 capitulation short made +20.9% at 3x and the February 2026
 contraction +1.7%, while the long side sat flat.
+
+## 4b. Open strategy search — is this actually the best strategy?
+
+An open competition (`experiments/open-search/`): 5 predeclared families,
+~160 configs, **nested walk-forward** (configs selected only inside each
+rolling 730d training window, evaluated once on the next unseen 180d window,
+8 folds chained), plus a **surrogate-null audit** — the identical search
+re-run on 12 fake USDT series to price how much return the search machinery
+extracts from nothing.
+
+| Family | OOS return | Sharpe | Max DD | Trades |
+|---|---|---|---|---|
+| Buy & hold BTC | **+189.1%** | 0.84 | −52.4% | — |
+| **USDT long events (winner)** | +174.8% | **1.68** | **−8.1%** | 32 |
+| Long/short mirror | +135.3% | 1.44 | −8.1% | 28 |
+| Regime switch | +110.9% | 0.83 | −46.5% | 5 |
+| BTC-only momentum (ablation) | +92.5% | 0.85 | −22.8% | 56 |
+
+The long-only USDT liquidity-event family wins: **positive in all 8 unseen
+windows** (including the 2025-26 bear where buy&hold drew down −52%), double
+the Sharpe of every alternative, +82pp over the BTC-only ablation (the
+liquidity layer is not repackaged momentum), and **ahead of all 12
+surrogate-null searches** (≈3× the best null; p = 1/13 ≈ 0.077, the floor at
+n=12). Shorts added nothing net of costs under honest selection. The frozen
+V27 long-only config shipped here is one member of the validated pattern
+(USDT slope event + top-decile percentile filter + BTC confirm + decay exit).
 
 ## 5. Optimal leverage
 

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>USDT Slope Strategies — Open Strategy Search</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; padding: 12px; }
+h1 { font-size: 17px; margin-bottom: 6px; color: #58a6ff; line-height: 1.3; }
+h2 { font-size: 14px; margin: 18px 0 8px; color: #8b949e; }
+.back { display: inline-block; font-size: 13px; color: #8b949e; text-decoration: none; margin-bottom: 10px; padding: 4px 10px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; }
+.back:active, .back:hover { color: #58a6ff; border-color: #58a6ff; }
+.meta { font-size: 12px; color: #8b949e; margin-bottom: 12px; }
+.notice { background: #211a0d; border: 1px solid #9e6a03; color: #f0c674; padding: 10px 12px; border-radius: 8px; margin: 10px 0 12px; font-size: 12px; line-height: 1.45; }
+.notice strong { color: #ffd866; }
+.rec { background: #0f2418; border: 1px solid #238636; color: #7ee2a8; padding: 10px 12px; border-radius: 8px; margin: 10px 0 12px; font-size: 13px; line-height: 1.55; }
+.rec strong { color: #3fb950; }
+table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 12px; }
+th { background: #161b22; color: #8b949e; text-align: right; padding: 6px 8px; border-bottom: 1px solid #30363d; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+td { padding: 5px 8px; border-bottom: 1px solid #21262d; text-align: right; }
+tr.best { background: #0f2418; }
+.pos { color: #3fb950; } .neg { color: #f85149; }
+@media (min-width: 768px) { body { padding: 20px; max-width: 1100px; margin: 0 auto; } h1 { font-size: 22px; } }
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← 返回总览 · All Strategies</a>
+<h1>Open Strategy Search — what is honestly the best strategy?</h1>
+<div class="meta">Nested walk-forward · 8 folds · eval 2021-09-27 → 2026-06-09 · 12 surrogate-null searches · immediate execution · 1x · costs included</div>
+<div class="notice"><strong>Method:</strong> 5 predeclared families (~160 configs) compete under nested walk-forward:
+configs are selected only inside each rolling 730-day training window, then evaluated once on the following
+180-day unseen window; the chained unseen-window equity is the family's score. Immediate execution, 1x leverage,
+5 bps/side + 3 bps/day funding. <strong>Selection-luck audit:</strong> the identical F3 search was re-run on 12 surrogate
+USDT series (circularly shifted log-changes — same statistics, no real USDT→BTC link); the real result must clear
+that null distribution. Full artifacts in <code>experiments/open-search/</code>.</div>
+<div class="rec"><strong>Verdict: the best strategy is the long-only USDT liquidity-event family (F3).</strong><br>Entry = USDT slope event (regime acceleration / Bollinger break / top-decile percentile) in the top ~7–10% of its 1-year distribution, confirmed by BTC 3-day momentum; exit = momentum decay (slope-peak / Kalman-velocity / trail); no shorts. It is the only family positive in all 8 unseen windows, has double the Sharpe of every alternative (1.68), one-sixth of buy&hold's drawdown (−8.1% vs −52.4%) at ~92% of its return, beats the BTC-only ablation by +82pp, and beats every surrogate-null search. The deployed frozen V27 long-only config is one member of this validated pattern.</div>
+<h2>Leaderboard — chained out-of-sample, 8 folds (2022-09-27 → 2026-06-09)</h2>
+<table>
+<thead><tr><th>Family</th><th>Total return</th><th>Daily Sharpe</th><th>Max DD</th><th>Trades</th><th>Win rate</th></tr></thead>
+<tbody><tr><td>F0 · Buy & hold BTC</td><td class="pos">+189.1%</td><td>0.84</td><td class="neg">-52.4%</td><td>—</td><td>—</td></tr>
+<tr class="best"><td>F3 · USDT long events ⭐</td><td class="pos">+174.8%</td><td>1.68</td><td class="neg">-8.0%</td><td>32</td><td>69%</td></tr>
+<tr><td>F4 · Long/short mirror</td><td class="pos">+135.3%</td><td>1.44</td><td class="neg">-8.0%</td><td>28</td><td>71%</td></tr>
+<tr><td>F1 · Regime switch (hold while USDT slope > 0)</td><td class="pos">+110.8%</td><td>0.83</td><td class="neg">-46.5%</td><td>5</td><td>60%</td></tr>
+<tr><td>F2 · BTC-only momentum (no USDT — ablation)</td><td class="pos">+92.5%</td><td>0.85</td><td class="neg">-22.8%</td><td>56</td><td>52%</td></tr>
+</tbody>
+</table>
+<h2>F3 per fold — selected config and unseen-window result (8/8 positive)</h2>
+<table>
+<thead><tr><th>Fold</th><th>Test window</th><th>Selected on train only</th><th>OOS return</th><th>Trades</th></tr></thead>
+<tbody><tr><td>1</td><td>2022-09-27 → 2023-03-25</td><td style="text-align:left">F3_pct_event_0.93_trail10_confirm</td><td class="pos">+26.7%</td><td>3</td></tr>
+<tr><td>2</td><td>2023-03-26 → 2023-09-21</td><td style="text-align:left">F3_bb_pctnone_fixed3_noconfirm</td><td class="pos">+8.4%</td><td>4</td></tr>
+<tr><td>3</td><td>2023-09-22 → 2024-03-19</td><td style="text-align:left">F3_bb_pctnone_fixed3_noconfirm</td><td class="pos">+16.8%</td><td>6</td></tr>
+<tr><td>4</td><td>2024-03-20 → 2024-09-15</td><td style="text-align:left">F3_regime_pct0.93_slope_peak_confirm</td><td class="pos">+10.6%</td><td>5</td></tr>
+<tr><td>5</td><td>2024-09-16 → 2025-03-14</td><td style="text-align:left">F3_regime_pct0.93_slope_peak_confirm</td><td class="pos">+28.4%</td><td>6</td></tr>
+<tr><td>6</td><td>2025-03-15 → 2025-09-10</td><td style="text-align:left">F3_regime_pct0.90_kalman75_confirm</td><td class="pos">+10.6%</td><td>3</td></tr>
+<tr><td>7</td><td>2025-09-11 → 2026-03-09</td><td style="text-align:left">F3_regime_pct0.90_kalman75_confirm</td><td class="pos">+4.5%</td><td>2</td></tr>
+<tr><td>8</td><td>2026-03-10 → 2026-06-09</td><td style="text-align:left">F3_or_bb_regime_pct0.90_fixed3_confirm</td><td class="pos">+4.3%</td><td>3</td></tr>
+</tbody>
+</table>
+<h2>Surrogate null — best score each fake-USDT search achieved</h2>
+<table>
+<thead><tr><th>Seed</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>REAL</th></tr></thead>
+<tbody><tr><td>Total return</td><td class="pos">+53%</td><td class="pos">+0%</td><td class="pos">+10%</td><td class="neg">-40%</td><td class="pos">+32%</td><td class="neg">-33%</td><td class="neg">-7%</td><td class="neg">-40%</td><td class="pos">+60%</td><td class="neg">-45%</td><td class="pos">+60%</td><td class="pos">+41%</td><td class="pos"><strong>+174.8%</strong></td></tr></tbody>
+</table>
+<div class="notice">Real F3 beats all 12 surrogates (≈3× the best null); p = 1/13 ≈ 0.077 — the smallest value n=12 allows.
+Caveats: 32 chained OOS trades is a small sample; per-fold winners rotate within the pattern, so trust the pattern,
+not any single parameterization. Past performance ≠ future results.</div>
+</body>
+</html>

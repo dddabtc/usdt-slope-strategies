@@ -39,6 +39,7 @@ h2 { font-size: 14px; margin: 16px 0 8px; color: #8b949e; }
 .rec { background: #0f2418; border: 1px solid #238636; color: #7ee2a8; padding: 10px 12px; border-radius: 8px; margin: 10px 0 12px; font-size: 13px; line-height: 1.5; }
 .rec strong { color: #3fb950; font-size: 15px; }
 .chart { width: 100%; height: 360px; }
+.zoombox { fill: rgba(1, 4, 9, 0.62) !important; }
 table { width: 100%; border-collapse: collapse; margin: 8px 0 20px; font-size: 12px; }
 th { background: #161b22; color: #8b949e; text-align: right; padding: 6px 8px; border-bottom: 1px solid #30363d; white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; }
@@ -58,7 +59,9 @@ long funding (3 bps/day) and close-based isolated-margin liquidation (0.5% maint
 trade sequence 10,000×. <em>Wick liq</em> counts liquidations if an intraday wick pierced 10% beyond the worst daily close —
 daily data cannot see wicks, so any leverage failing this is unsafe regardless of its return.
 Past performance ≠ future results; ~30 trades is a small sample.</div>
+<h2>Total return &amp; max drawdown vs leverage</h2>
 <div id="chart-return" class="chart"></div>
+<h2>Expected log-growth per trade vs leverage (peak = full Kelly)</h2>
 <div id="chart-growth" class="chart"></div>
 __TABLES__
 <script>
@@ -71,12 +74,19 @@ Object.keys(sweeps).forEach(function(mode) {
   retTraces.push({x: s.leverage, y: s.max_drawdown.map(function(v){return v*100;}), name: mode + ' maxDD %', line: {color: colors[mode], width: 1.5, dash: 'dot'}, yaxis: 'y'});
   gTraces.push({x: s.leverage, y: s.exp_log_growth, name: mode + ' E[log growth]/trade', line: {color: colors[mode], width: 2}});
 });
-var base = {paper_bgcolor: '#0d1117', plot_bgcolor: '#0d1117', font: {color: '#c9d1d9', size: 11},
-  margin: {t: 40, b: 40, l: 60, r: 20}, hovermode: 'x unified',
-  legend: {bgcolor: 'rgba(0,0,0,0)', x: 0, y: 1.15, orientation: 'h'},
-  xaxis: {title: 'Leverage', gridcolor: '#21262d', dtick: 0.5}};
-Plotly.newPlot('chart-return', retTraces, Object.assign({}, base, {title: {text: 'Total return & max drawdown vs leverage', font: {size: 13}}, yaxis: {title: '%', gridcolor: '#21262d'}}), {responsive: true});
-Plotly.newPlot('chart-growth', gTraces, Object.assign({}, base, {title: {text: 'Expected log-growth per trade vs leverage (peak = full Kelly)', font: {size: 13}}, yaxis: {title: 'E[log(1+r)]', gridcolor: '#21262d'}}), {responsive: true});
+function render() {
+  var narrow = window.innerWidth < 768;
+  // 4 legend items wrap to 2 rows on phones; reserve top margin accordingly
+  var base = {paper_bgcolor: '#0d1117', plot_bgcolor: '#0d1117', font: {color: '#c9d1d9', size: 11},
+    margin: {t: narrow ? 78 : 34, b: 40, l: 56, r: 16}, hovermode: 'x unified',
+    legend: {bgcolor: 'rgba(0,0,0,0)', x: 0, y: 1.0, yanchor: 'bottom', orientation: 'h', font: {size: 11}},
+    xaxis: {title: 'Leverage', gridcolor: '#21262d', dtick: narrow ? 1 : 0.5}};
+  var cfg = {responsive: true, modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toImage']};
+  Plotly.react('chart-return', retTraces, Object.assign({}, base, {yaxis: {title: '%', gridcolor: '#21262d'}}), cfg);
+  Plotly.react('chart-growth', gTraces, Object.assign({}, base, {yaxis: {title: 'E[log(1+r)]', gridcolor: '#21262d'}}), cfg);
+}
+render();
+window.addEventListener('resize', render);
 </script>
 </body>
 </html>

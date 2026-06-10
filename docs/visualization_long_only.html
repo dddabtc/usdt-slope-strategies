@@ -13,7 +13,8 @@ h1 { font-size: 17px; margin-bottom: 6px; color: #58a6ff; line-height: 1.3; }
 #chart { width: 100%; height: 400px; min-height: 320px; }
 #controls { margin: 10px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 #controls label { font-size: 12px; color: #8b949e; }
-#controls select { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 6px; font-size: 13px; -webkit-appearance: none; min-height: 36px; }
+#controls select, #controls button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 6px; font-size: 13px; -webkit-appearance: none; min-height: 36px; }
+#controls button:active { background: #30363d; }
 #trade-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
 #trade-table th { background: #161b22; color: #8b949e; text-align: left; padding: 8px; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
 #trade-table td { padding: 8px; border-bottom: 1px solid #21262d; cursor: pointer; }
@@ -25,6 +26,10 @@ h1 { font-size: 17px; margin-bottom: 6px; color: #58a6ff; line-height: 1.3; }
 .short-tag { color: #f0883e; font-weight: 600; }
 .rangeslider-mask-min, .rangeslider-mask-max { fill-opacity: 0 !important; }
 .rangeslider-slidebox { fill: #8b949e !important; fill-opacity: 0.22 !important; stroke: #8b949e !important; stroke-width: 1px !important; }
+/* drag-to-zoom: dim the EXCLUDED sides dark so the selected range reads as
+   highlighted (Plotly's default tints the excluded sides light gray, which
+   looks inverted on a dark theme) */
+.zoombox { fill: rgba(1, 4, 9, 0.62) !important; }
 #summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
 .notice { background: #211a0d; border: 1px solid #9e6a03; color: #f0c674; padding: 10px 12px; border-radius: 8px; margin: 10px 0 12px; font-size: 12px; line-height: 1.45; }
 .notice strong { color: #ffd866; }
@@ -75,6 +80,7 @@ h1 { font-size: 17px; margin-bottom: 6px; color: #58a6ff; line-height: 1.3; }
     <option value="deriv1">USDT 一阶导</option>
     <option value="deriv2">USDT 二阶导</option>
   </select>
+  <button id="reset-btn" onclick="render()">⟲ Reset</button>
 </div>
 <div id="chart"></div>
 <table id="trade-table">
@@ -175,7 +181,8 @@ function baseLayout(extraTopRows) {
   var nItems = 2 + markerGroups.filter(function(g) { return g.dates.length > 0; }).length;
   var narrow = window.innerWidth < 768;
   var rows = narrow ? Math.ceil(nItems / 2) : 1;
-  var t = 24 + rows * 22 + (extraTopRows || 0) * 18;
+  // extra headroom keeps the floating modebar clear of the legend rows
+  var t = 34 + rows * 22 + (extraTopRows || 0) * 18;
   return {
     paper_bgcolor: '#0d1117', plot_bgcolor: '#0d1117',
     font: {color: '#c9d1d9', size: 11},
@@ -208,7 +215,7 @@ function render() {
     layout = baseLayout(0);
     layout.yaxis = {title: show === 'deriv1' ? 'USDT slope ($/d)' : 'USDT velocity ($/d²)', gridcolor: '#21262d', side: 'left'};
     layout.yaxis2 = {title: 'BTC %', overlaying: 'y', side: 'right', gridcolor: '#161b22'};
-    Plotly.react('chart', traces, layout, {responsive: true, scrollZoom: true, displayModeBar: false});
+    Plotly.react('chart', traces, layout, {responsive: true, scrollZoom: true, modeBarButtonsToRemove: ["lasso2d", "select2d", "toImage"]});
     return;
   }
 
@@ -227,7 +234,7 @@ function render() {
   layout = baseLayout(0);
   layout.yaxis = {title: scale === 'percent' ? 'Change %' : (scale === 'log' ? 'BTC (log)' : 'BTC ($)'), gridcolor: '#21262d', side: 'left', type: yType};
   layout.yaxis2 = {title: 'USDT Mcap', overlaying: 'y', side: 'right', gridcolor: '#161b22', type: yType};
-  Plotly.react('chart', traces, layout, {responsive: true, scrollZoom: true, displayModeBar: false});
+  Plotly.react('chart', traces, layout, {responsive: true, scrollZoom: true, modeBarButtonsToRemove: ["lasso2d", "select2d", "toImage"]});
 }
 
 function highlightTrade(idx) {

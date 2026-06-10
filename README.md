@@ -83,7 +83,7 @@ Both bounds are pinned to the original repo's frozen artifacts by
 
 Evaluation window 2021-09-27 → latest settled bar (refreshed daily by the
 cron; parameters are frozen so extending the window adds data, not fitting).
-As of 2026-06-09: BTC buy & hold +46.2%. Fees and funding included. Daily
+As of 2026-06-10: BTC buy & hold +46.2%. Fees and funding included. Daily
 Sharpe, daily max drawdown.
 
 **Long-Only** (frozen V27 entry/exit):

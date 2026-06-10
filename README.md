@@ -219,8 +219,9 @@ maintenance margin, signal constants) lives in `StrategyConfig`
   the honest price of being slower; the 24h bound is the floor.
 - ~30 closed trades is a small sample; every number carries wide confidence
   bands (quantified by the bootstrap columns on the sweep page).
-- Benchmark metrics are frozen at 2026-03-19; later trades are shown as a
-  Post-benchmark overlay and never enter headline numbers.
+- The evaluation window extends to the latest settled bar daily; the
+  frozen-window (→2026-03-19) figures stay in the page notices for
+  comparability with the original repo.
 - Daily closes cannot see intraday wicks; the wick-stress column is an
   approximation. Liquidation at high leverage can be worse in practice.
 - Funding is modeled flat (3 bps/day longs, 0 shorts); real funding varies

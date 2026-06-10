@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USDT Slope Strategies</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+h1{font-size:1.8em;margin-bottom:8px;color:#58a6ff}
+.subtitle{color:#8b949e;margin-bottom:24px;font-size:.95em;text-align:center}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:900px;width:100%}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;text-decoration:none;color:inherit;transition:border-color .2s}
+.card:hover{border-color:#58a6ff}
+.card h2{font-size:1.1em;color:#58a6ff;margin-bottom:8px}
+.card .return{font-size:2em;font-weight:700;color:#3fb950}
+.card .return.mid{color:#f0883e}
+.card .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.card .stat{font-size:.8em}
+.card .stat .label{color:#8b949e}
+.card .stat .val{font-weight:600}
+.best{border-color:#238636;position:relative}
+.best::before{content:'⭐ Recommended';position:absolute;top:-10px;right:16px;background:#238636;color:#fff;font-size:.7em;padding:2px 8px;border-radius:4px}
+.footer{margin-top:32px;color:#484f58;font-size:.8em;text-align:center;line-height:1.6}
+.footer a{color:#58a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+<h1>USDT Slope Strategies</h1>
+<p class="subtitle">Frozen benchmark: 2021-09-27 → 2026-03-19 · honest +1-day execution · fees &amp; funding included<br>BTC buy&amp;hold same window: +65.7%</p>
+<div class="cards">
+<a href="visualization_long_only.html" class="card best">
+  <h2>Long-Only · 单纯做多</h2>
+  <div class="return">+319%</div>
+  <div class="stats">
+    <div class="stat"><span class="label">Sharpe</span><br><span class="val">0.88</span></div>
+    <div class="stat"><span class="label">Win Rate</span><br><span class="val">59%</span></div>
+    <div class="stat"><span class="label">Trades</span><br><span class="val">27</span></div>
+    <div class="stat"><span class="label">Max DD</span><br><span class="val">-34.8%</span></div>
+    <div class="stat"><span class="label">Leverage</span><br><span class="val">3x</span></div>
+  </div>
+</a>
+<a href="visualization_long_short.html" class="card">
+  <h2>Long/Short · 多空双向</h2>
+  <div class="return">+255%</div>
+  <div class="stats">
+    <div class="stat"><span class="label">Sharpe</span><br><span class="val">0.83</span></div>
+    <div class="stat"><span class="label">Win Rate</span><br><span class="val">58%</span></div>
+    <div class="stat"><span class="label">Trades</span><br><span class="val">31</span></div>
+    <div class="stat"><span class="label">Max DD</span><br><span class="val">-31.6%</span></div>
+    <div class="stat"><span class="label">Leverage</span><br><span class="val">2.5x</span></div>
+  </div>
+</a>
+<a href="visualization_leverage.html" class="card">
+  <h2>Leverage Sweep · 最佳杠杆</h2>
+  <div class="return mid">0.5–6.0x</div>
+  <div class="stats">
+    <div class="stat"><span class="label">Long-Only</span><br><span class="val">3.0x rec</span></div>
+    <div class="stat"><span class="label">Long/Short</span><br><span class="val">2.5x rec</span></div>
+    <div class="stat"><span class="label">Method</span><br><span class="val">Kelly + bootstrap + liq</span></div>
+  </div>
+</a>
+
+</div>
+<p class="footer">Long side = frozen canonical V27 from <a href="https://github.com/dddabtc/usdt-slope-research">usdt-slope-research</a> (verified bit-identical, then costs added) · shorts are predeclared mirrors, regime-gated<br>
+Data: CoinGecko daily (USDT market cap, BTC price), refreshed to 2026-06-09 · not financial advice</p>
+</body>
+</html>

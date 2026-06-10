@@ -6,7 +6,7 @@
   },
   "long_short": {
     "growth_optimal_leverage": 6.0,
-    "recommended_leverage": 2.5,
+    "recommended_leverage": 3.0,
     "rule": "max leverage with zero wick-stress liquidations, bootstrap-median maxDD >= -35%, bootstrap-P5 return > 0, and <= half of growth-optimal"
   }
 }

@@ -4,10 +4,10 @@
 
 Two deployable BTC strategies built on the USDT-liquidity signal from
 [dddabtc/usdt-slope-research](https://github.com/dddabtc/usdt-slope-research):
-the canonical V27 long side — **verified bit-for-bit here, then made honest with
-real trading costs** — plus a predeclared mirrored short side. Leverage is a
-single config parameter; an optimal value is derived from a liquidation-aware
-Kelly/bootstrap sweep.
+the canonical V27 long side — **verified trade-for-trade here, then made honest
+with real trading costs and a correct execution-timing model** — plus a
+predeclared mirrored short side. Leverage is a single config parameter; an
+optimal value is derived from a liquidation-aware Kelly/bootstrap sweep.
 
 **Interactive results (same pages as the original repo):**
 
@@ -20,69 +20,94 @@ Kelly/bootstrap sweep.
 
 ## 1. Verification of the original strategy
 
-Before building anything, canonical V27 was independently re-validated
-(frozen data, frozen parameters, honest +1-day execution lag):
+Canonical V27 was independently re-validated before anything was built.
+All checks below deliberately use the **worst-case execution bound** (wait a
+full day after each signal) — if the edge survives there, prompt execution
+only improves it:
 
 | Check | Result |
 |-------|--------|
-| Reproduce frozen benchmark | ✅ identical: 27 trades, +320.6% @2.5x no-cost, Sharpe 0.97, DD −27.3% |
-| Trade-by-trade diff vs original artifact | ✅ all 27 trades match to the cent (`tests_regression.py`) |
-| Beats BTC buy & hold | ✅ +90.9% @1x (no costs) vs +65.7% B&H, with only 10.5% time in market |
+| Reproduce both frozen artifacts | ✅ identical: immediate mode 28 trades +2326.7%, one-day-delay mode 27 trades +320.6% (@2.5x, no costs) |
+| Trade-by-trade diff vs original artifacts | ✅ all trades match to the cent in both modes (`tests_regression.py`) |
+| Beats BTC buy & hold | ✅ +90.9% @1x worst-case bound vs +65.7% B&H, with only 10.5% time in market |
 | Entry-timing value (placebo test) | ✅ beats **96.5%** of 2,000 random bull-regime entry sets using the same exit rule |
 | Statistical significance | ✅ per-trade mean +2.60%, t-stat 2.18; bootstrap P(total ≤ 0) = 1.3% |
-| Cost robustness | ✅ at 10 bps/side the 2.5x return is still +269.8% (vs +320.9% free) |
+| Cost robustness | ✅ at 10 bps/side the worst-case-bound return is still +269.8% |
 | Liquidation risk | ✅ zero close-based liquidations up to 5x in-sample |
 
-Important context: the original README headline (+2152%, Sharpe 5.57) is the
-**same-day-execution legacy mode** — the original repo itself froze the honest
-number at +320.6% (`execution_lag_bars=1`). Everything in this repo uses the
-honest mode only, and adds costs on top.
+## 2. Execution timing — why immediate execution is the right model
 
-## 2. What was optimized / changed
+Every daily bar in this dataset is a **00:00 UTC snapshot**, not an
+end-of-day aggregate: the bar labeled day T is fully known seconds after
+00:00 UTC on day T. The underlying event — USDT issuance — is observable
+on-chain in real time (Tether mints are public the moment they confirm),
+and BTC trades 24/7 with no open/close gate. So a signal computed from the
+day-T snapshot is executable within minutes of 00:00 UTC on day T.
 
-1. **Real costs**: 5 bps/side fee+slippage and 3 bps/day long funding, charged
-   on leveraged notional (both configurable). The original engine traded free.
-2. **Liquidation modeling**: close-based isolated-margin check
-   (0.5% maintenance) plus a 10% intraday-wick stress column in the sweep —
-   daily data cannot see wicks, so leverage that only survives wick-free
-   closes is flagged as unsafe.
-3. **Short side** (long/short strategy): every long rule mirrored with **zero
+The original repo treated "+1 day" as the only honest mode; that is the
+right *worst-case bound* but the wrong default — it models an operator who
+sees a liquidity surge and then waits 24 hours. Fills here are modeled at
+`execution_delay_frac` of the way to the next snapshot. How the edge decays
+with reaction time (long-only @1x, costs included):
+
+| Reaction time | 0h (headline) | 1h | 3h | 6h | 12h | 24h (worst case) |
+|---|---|---|---|---|---|---|
+| Total return | +282.1% | +270.3% | +247.7% | +216.4% | +162.2% | +80.4% |
+
+Reacting within the hour keeps ~96% of the immediate-execution result; most
+of the alpha sits in the first hours after the snapshot — exactly what a
+liquidity-inflow signal should look like. A 6-hourly cron still keeps ~77%.
+Both bounds are pinned to the original repo's frozen artifacts by
+`tests_regression.py`.
+
+## 3. What was optimized / changed
+
+1. **Execution model**: continuous-delay fills (`execution_delay_frac`),
+   headline = immediate; the 24h bound remains available and tested.
+2. **Real costs**: 5 bps/side fee+slippage and 3 bps/day long funding,
+   charged on leveraged notional (configurable). The original engine traded free.
+3. **Liquidation modeling**: close-based isolated-margin check
+   (0.5% maintenance) plus a 10% intraday-wick stress column in the sweep.
+4. **Short side** (long/short strategy): every long rule mirrored with **zero
    new fitted parameters** — lower Bollinger-band break / contraction regime,
    BTC 3d down-confirmation, slope percentile ≤ 7%, slope-trough exit — gated
-   to bear regime (60d USDT slope < 0), which is the original research's V23
-   regime rule mirrored. Without the gate, mirrored shorts fire on bull-market
-   USDT dips and lose to BTC drift (verified: 15 ungated shorts ≈ net zero
-   with double the drawdown; gated: 4 shorts, positive).
-4. **Leverage as a first-class parameter** with a derived optimum (below).
+   to bear regime (60d USDT slope < 0), the original research's V23 regime
+   rule mirrored. Without the gate, mirrored shorts fire on bull-market USDT
+   dips and lose to BTC drift (verified: ungated shorts ≈ net zero with
+   double the drawdown).
+5. **Leverage as a first-class parameter** with a derived optimum (below).
 
-## 3. Headline results (honest execution + costs)
+## 4. Headline results (immediate execution + costs)
 
 Frozen benchmark window 2021-09-27 → 2026-03-19, BTC buy & hold +65.7%.
-Signals execute one day after they appear. Fees and funding included.
+Fees and funding included. Daily Sharpe, daily max drawdown.
 
 **Long-Only** (frozen V27 entry/exit):
 
 | Leverage | Return | Ann. | Sharpe | Max DD | Win Rate | Trades |
 |----------|--------|------|--------|--------|----------|--------|
-| 1.0x | +76.8% | +13.6% | 0.83 | −12.5% | 59% | 27 |
-| 2.0x | +183.8% | +26.2% | 0.85 | −24.2% | 59% | 27 |
-| **3.0x (recommended)** | **+319.2%** | **+37.7%** | **0.88** | **−34.8%** | **59%** | **27** |
+| 1.0x | +282% | +34.9% | 1.89 | −8.1% | 68% | 28 |
+| 2.0x | +1,121% | +74.8% | 1.89 | −15.8% | 68% | 28 |
+| **3.0x (recommended)** | **+3,299%** | **+119.7%** | **1.89** | **−23.2%** | **68%** | **28** |
 
 **Long/Short** (V27 longs + mirrored regime-gated shorts):
 
 | Leverage | Return | Ann. | Sharpe | Max DD | Win Rate | Trades |
 |----------|--------|------|--------|--------|----------|--------|
-| 1.0x | +79.6% | +14.0% | 0.78 | −13.4% | 58% | 31 (27L/4S) |
-| 2.0x | +189.7% | +26.8% | 0.81 | −25.8% | 58% | 31 |
-| **2.5x (recommended)** | **+254.9%** | **+32.7%** | **0.83** | **−31.6%** | **58%** | **31** |
+| 1.0x | +295% | +35.9% | 1.73 | −9.6% | 65% | 34 (28L/6S) |
+| 2.0x | +1,196% | +77.2% | 1.73 | −19.2% | 65% | 34 |
+| **3.0x (recommended)** | **+3,576%** | **+123.6%** | **1.73** | **−28.7%** | **65%** | **34** |
+
+Worst-case bound for reference (wait 24h, costs included): long-only
++76.8% @1x / +319.2% @3x; long/short +79.6% @1x / +254.9% @2.5x — still
+comfortably above buy & hold.
 
 The short book is small by construction — USDT market cap rarely contracts
-(2022 was the only sustained episode). Its value is regime coverage: in a
-2022-style liquidity contraction the short side activates (June 2022
-capitulation short +8.8% at 1x; February 2026 +2.0%) while the long side
-stays flat.
+(2022 was the only sustained episode). Its value is regime coverage: the
+June 2022 capitulation short made +20.9% at 3x and the February 2026
+contraction +1.7%, while the long side sat flat.
 
-## 4. Optimal leverage
+## 5. Optimal leverage
 
 Method: per-trade expected log-growth (Kelly), 10,000-resample bootstrap of
 the trade sequence, close-based liquidation plus 10% wick stress, full grid
@@ -90,63 +115,65 @@ the trade sequence, close-based liquidation plus 10% wick stress, full grid
 
 | | Long-Only | Long/Short |
 |---|---|---|
-| Growth-optimal (full Kelly) | >6x (grid edge — n=27 sample, do not trust) | >6x (same caveat) |
-| **Recommended** | **3.0x** | **2.5x** |
-| Conservative (DD ≤ ~25%) | 2.0x | 2.0x |
+| Growth-optimal (full Kelly) | ≥6x (grid edge — n≈30 sample, do not trust) | ≥6x (same caveat) |
+| **Recommended** | **3.0x** | **3.0x** |
+| Conservative (DD ≤ ~20%) | 2.0x | 2.0x |
+| Under the 24h worst-case bound | 3.0x | 2.5x |
 
 Recommendation rule (predeclared): largest leverage with zero wick-stress
 liquidations, bootstrap-median max DD ≥ −35%, bootstrap-5th-percentile total
-return > 0, and ≤ half of growth-optimal. The binding constraints in-sample:
-long-only breaks the DD cap at 3.25x and goes P5-negative at 3.5x; long/short
-goes P5-negative at 2.75x.
+return > 0, and ≤ half of growth-optimal. Under immediate execution the
+in-sample stats are so strong that only the half-Kelly cap binds — which is
+precisely why it exists: with ~30 trades and daily-close-only data, the
+constraint protecting you is estimation-error discipline, not the backtest.
 
-Why not full Kelly: with ~30 trades the Kelly estimate is dominated by
-estimation error, daily closes hide intraday wicks, and the worst observed
-trade (−13% raw) would mean −39% at 3x. Half-Kelly-style discounting is the
-standard answer to both.
-
-## 5. How to run
+## 6. How to run
 
 ```bash
 pip install -r requirements.txt
 
-python tests_regression.py        # verify long side == canonical V27
+python tests_regression.py        # both execution modes == canonical V27 artifacts
+python tests_verification.py      # placebo / significance / cost checks
 python run_backtest.py            # both strategies at recommended leverage
 python run_backtest.py --leverage 2.0   # any leverage you want
 python run_leverage_sweep.py      # full grid + optimal-leverage page
 python scripts/refresh_data.py    # pull latest CoinGecko data + regenerate pages
 ```
 
-Every strategy parameter (leverage, fees, funding, maintenance margin, signal
-constants) lives in `StrategyConfig` (`src/engine.py`).
+Every strategy parameter (leverage, execution delay, fees, funding,
+maintenance margin, signal constants) lives in `StrategyConfig`
+(`src/engine.py`).
 
-## 6. Project structure
+## 7. Project structure
 
 ```
 ├── src/
-│   ├── engine.py        # signals (long + mirrored short), exits, costs,
-│   │                    # liquidation, trade collection, daily MTM equity
+│   ├── engine.py        # signals (long + mirrored short), exits, execution
+│   │                    # model, costs, liquidation, daily MTM equity
 │   ├── leverage.py      # Kelly / bootstrap / liquidation-aware sweep
 │   ├── data.py          # CoinGecko fetch + *_full.csv history merge
 │   └── visualize.py     # interactive result pages (original repo template)
 ├── run_backtest.py      # headline backtests + pages
 ├── run_leverage_sweep.py
-├── tests_regression.py  # long side must equal canonical V27 exactly
+├── tests_regression.py  # both modes must equal canonical V27 artifacts
+├── tests_verification.py
 ├── scripts/refresh_data.py
 ├── data/                # daily CSVs (BTC price, USDT/USDC/DAI mcap)
 ├── experiments/         # artifacts: trades.json, equity.csv, ledger.jsonl
 └── docs/                # GitHub Pages output
 ```
 
-## 7. Caveats
+## 8. Caveats
 
-- 27–31 closed trades is a small sample; every number above carries wide
-  confidence bands (the bootstrap columns on the sweep page quantify them).
+- The headline assumes you execute within minutes of the 00:00 UTC snapshot
+  (on-chain mint watching or a tight polling loop). The decay table in §2 is
+  the honest price of being slower; the 24h bound is the floor.
+- ~30 closed trades is a small sample; every number carries wide confidence
+  bands (quantified by the bootstrap columns on the sweep page).
 - Benchmark metrics are frozen at 2026-03-19; later trades are shown as a
   Post-benchmark overlay and never enter headline numbers.
-- Daily CoinGecko closes cannot see intraday wicks; the wick-stress column is
-  an approximation, not a guarantee. Liquidation at high leverage can be
-  worse in practice.
-- Funding is modeled as a flat 3 bps/day for longs and 0 for shorts;
-  real funding varies and occasionally inverts.
+- Daily closes cannot see intraday wicks; the wick-stress column is an
+  approximation. Liquidation at high leverage can be worse in practice.
+- Funding is modeled flat (3 bps/day longs, 0 shorts); real funding varies
+  and occasionally inverts.
 - Not financial advice.

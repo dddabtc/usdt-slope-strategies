@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Independent effectiveness checks behind README section 1.
 
-Runs on the frozen benchmark window with costs disabled (matching the
-original engine) so the numbers are directly comparable:
+Deliberately runs in the WORST-CASE execution mode (wait a full day after
+the signal snapshot) with costs disabled, matching the original engine's
+conservative artifact: if the edge survives here, prompt execution only
+makes it better.  Checks:
   - buy & hold comparison
   - per-trade significance (t-stat, bootstrap)
   - random-entry placebo (same exit rule, same trade count, bull regime pool)
@@ -27,6 +29,7 @@ from src.engine import (
 rng = np.random.default_rng(42)
 
 cfg = StrategyConfig(mode=LONG_ONLY, leverage=2.5,
+                     execution_delay_frac=None, execution_lag_bars=1,
                      fee_bps_per_side=0.0, long_funding_bps_per_day=0.0)
 data = load_full_data()
 result = backtest(data, cfg, TRAIN_END, BENCHMARK_TEST_END)

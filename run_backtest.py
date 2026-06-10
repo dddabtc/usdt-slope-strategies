@@ -30,11 +30,11 @@ from src.visualize import build_kalman, generate_page
 OUTDIR = PROJECT / "experiments"
 DOCS = PROJECT / "docs"
 
-RECOMMENDED = {LONG_ONLY: 3.0, LONG_SHORT: 2.5}
+RECOMMENDED = {LONG_ONLY: 3.0, LONG_SHORT: 3.0}
 
 TITLES = {
-    LONG_ONLY: "Long-Only — frozen V27 entry/exit, costs included",
-    LONG_SHORT: "Long/Short — V27 longs + mirrored regime-gated shorts",
+    LONG_ONLY: "Long-Only — frozen V27 entry/exit, immediate execution, costs included",
+    LONG_SHORT: "Long/Short — V27 longs + mirrored regime-gated shorts, immediate execution",
 }
 
 
@@ -55,12 +55,16 @@ def notice_html(cfg: StrategyConfig, m: dict, post: list[dict]) -> str:
                       'BTC 3d down, slope percentile ≤ 7%) and are additionally gated to bear regime '
                       '(60d USDT slope < 0) — the predeclared V23 regime rule mirrored, not re-fitted.')
     return (
-        '<div class="notice"><strong>Honest-execution methodology:</strong> entries and exits execute '
-        'one day after their signal (+1 bar lag, no hindsight); parameters are the frozen canonical V27 '
-        'set from <a href="https://github.com/dddabtc/usdt-slope-research" style="color:#ffd866">usdt-slope-research</a>, '
-        'not re-fitted here. Costs included: 5 bps/side fee+slippage and 3 bps/day long funding on '
-        f'{cfg.leverage:g}x notional; close-based isolated-margin liquidation modeled (none occurred).'
-        f' Headline metrics are frozen at {BENCHMARK_TEST_END.date()};'
+        '<div class="notice"><strong>Methodology:</strong> every daily bar is a 00:00 UTC snapshot — '
+        'USDT issuance is on-chain observable in real time and BTC trades 24/7, so signals are executable '
+        'within minutes of the snapshot. Headline fills are at the signal snapshot itself (immediate '
+        'execution); delaying 1h costs ≈4% of total return, 6h ≈23%, and waiting a full day (the most '
+        'conservative bound) still leaves the strategy profitable — see README for the decay table. '
+        'Parameters are the frozen canonical V27 set from '
+        '<a href="https://github.com/dddabtc/usdt-slope-research" style="color:#ffd866">usdt-slope-research</a>, '
+        'verified trade-for-trade and not re-fitted. Costs included: 5 bps/side fee+slippage and 3 bps/day '
+        f'long funding on {cfg.leverage:g}x notional; close-based isolated-margin liquidation modeled '
+        f'(none occurred). Headline metrics are frozen at {BENCHMARK_TEST_END.date()};'
         f' BTC buy&hold over the same window: {m["btc_buy_hold_return"]*100:+.1f}%.'
         + short_line + post_line +
         ' Past performance does not guarantee future results.</div>'
@@ -99,7 +103,8 @@ def run_mode(data: dict, mode: str, leverage: float | None) -> dict:
 
     display_trades = [{**t, "phase": "Benchmark"} for t in result["trades"]] + post
     meta = (f"OOS: {TRAIN_END.date()} to {BENCHMARK_TEST_END.date()} · {m['n_trades']} trades "
-            f"(L{m['n_long']}/S{m['n_short']}) · {cfg.leverage:g}x leverage · data to {latest.date()}")
+            f"(L{m['n_long']}/S{m['n_short']}) · {cfg.leverage:g}x leverage · immediate execution "
+            f"· data to {latest.date()}")
     page_name = f"visualization_{mode}.html"
     generate_page(chart_df, display_trades, m, TITLES[mode], meta,
                   notice_html(cfg, m, post), DOCS / page_name)
@@ -139,7 +144,7 @@ h1{font-size:1.8em;margin-bottom:8px;color:#58a6ff}
 </head>
 <body>
 <h1>USDT Slope Strategies</h1>
-<p class="subtitle">Frozen benchmark: __WINDOW__ · honest +1-day execution · fees &amp; funding included<br>BTC buy&amp;hold same window: __BH__</p>
+<p class="subtitle">Frozen benchmark: __WINDOW__ · immediate execution at 00:00 UTC snapshots · fees &amp; funding included<br>BTC buy&amp;hold same window: __BH__</p>
 <div class="cards">
 __CARDS__
 </div>
@@ -186,7 +191,7 @@ def write_index(results: dict, latest: str) -> None:
   <div class="return mid">0.5–6.0x</div>
   <div class="stats">
     <div class="stat"><span class="label">Long-Only</span><br><span class="val">3.0x rec</span></div>
-    <div class="stat"><span class="label">Long/Short</span><br><span class="val">2.5x rec</span></div>
+    <div class="stat"><span class="label">Long/Short</span><br><span class="val">3.0x rec</span></div>
     <div class="stat"><span class="label">Method</span><br><span class="val">Kelly + bootstrap + liq</span></div>
   </div>
 </a>

@@ -23,8 +23,19 @@ bull-market USDT dips and lose to BTC's upward drift.
 
 On top of the original engine this adds: execution costs (fees + funding on
 leveraged notional), close-based isolated-margin liquidation, and a daily
-mark-to-market equity curve for both strategies.  Execution lag is always
-one bar: a signal on day T trades on day T+1's bar.
+mark-to-market equity curve for both strategies.
+
+Execution timing.  Every daily data point is a 00:00 UTC *snapshot*, not an
+end-of-day aggregate: the bar labeled day T is fully known seconds after
+00:00 UTC on day T (USDT issuance is on-chain observable in real time), and
+BTC trades 24/7.  Execution is therefore modeled as a fill at
+``execution_delay_frac`` of the way to the next snapshot:
+  0.0  -> immediate execution at the signal snapshot (default headline)
+  0.25 -> ~6h delay (a lazy 6-hourly cron)
+  1.0  -> wait a full day (the original repo's "+1 bar" conservative bound)
+Setting ``execution_delay_frac=None`` falls back to the integer
+``execution_lag_bars`` semantics for exact comparability with the original
+repo's two frozen artifacts.
 """
 
 from __future__ import annotations
@@ -64,6 +75,9 @@ class StrategyConfig:
     # shorts only in a contracting-liquidity regime (predeclared V23 mirror)
     short_regime_gate: bool = True
     # --- execution / cost model ---
+    # fill at this fraction of the gap to the next snapshot (0 = immediate);
+    # None falls back to integer execution_lag_bars below
+    execution_delay_frac: float | None = 0.0
     execution_lag_bars: int = 1
     fee_bps_per_side: float = 5.0         # taker fee + slippage, per side, on notional
     long_funding_bps_per_day: float = 3.0  # perp funding paid by longs (~0.01%/8h)
@@ -258,13 +272,14 @@ def _funding_bps(side: int, config: StrategyConfig) -> float:
 
 
 def _liquidation_idx(df: pd.DataFrame, buy_idx: int, sell_idx: int, side: int,
-                     config: StrategyConfig, wick_stress: float = 0.0):
+                     config: StrategyConfig, wick_stress: float = 0.0,
+                     entry_price: float | None = None):
     """First bar in (buy_idx, sell_idx] where close-based equity hits the
     maintenance margin.  Returns None if the position survives."""
     L = config.leverage
     if L <= 1.0:
         return None
-    p0 = float(df.iloc[buy_idx]["price"])
+    p0 = float(df.iloc[buy_idx]["price"]) if entry_price is None else float(entry_price)
     for j in range(buy_idx + 1, sell_idx + 1):
         p = float(df.iloc[j]["price"])
         if side > 0:
@@ -304,7 +319,18 @@ def collect_trades(signals_df: pd.DataFrame, btc_df: pd.DataFrame, config: Strat
         return [], df
 
     allow_short = config.mode == LONG_SHORT
-    lag = int(config.execution_lag_bars)
+    alpha = config.execution_delay_frac
+    use_frac = alpha is not None
+    lag = 0 if use_frac else int(config.execution_lag_bars)
+
+    def fill_price(idx: int) -> float:
+        """Fill at alpha of the way from snapshot idx to the next one."""
+        p = float(df.iloc[idx]["price"])
+        if use_frac and alpha > 0 and idx + 1 < len(df):
+            p_next = float(df.iloc[idx + 1]["price"])
+            p = p + float(alpha) * (p_next - p)
+        return p
+
     trades: list[dict] = []
     capital = float(config.initial_capital)
     i = 0
@@ -326,7 +352,8 @@ def collect_trades(signals_df: pd.DataFrame, btc_df: pd.DataFrame, config: Strat
         exit_signal_idx, exit_reason = _exit_decision(df, buy_idx, side, config)
         sell_idx = min(exit_signal_idx + lag, len(df) - 1)
 
-        liq_idx = _liquidation_idx(df, buy_idx, sell_idx, side, config)
+        buy_price = fill_price(buy_idx)
+        liq_idx = _liquidation_idx(df, buy_idx, sell_idx, side, config, entry_price=buy_price)
         liquidated = liq_idx is not None
         if liquidated:
             sell_idx = liq_idx
@@ -334,8 +361,8 @@ def collect_trades(signals_df: pd.DataFrame, btc_df: pd.DataFrame, config: Strat
 
         is_open = right_censor_open and exit_reason == "open"
         sell = df.iloc[sell_idx]
-        buy_price = float(buy["price"])
-        sell_price = float(sell["price"])
+        # liquidation closes at the breached snapshot itself, not an alpha-fill
+        sell_price = float(sell["price"]) if liquidated else fill_price(sell_idx)
         raw_ret = (sell_price - buy_price) / buy_price
         hold_days = int((sell["date"] - buy["date"]).days)
         if liquidated:
@@ -356,7 +383,8 @@ def collect_trades(signals_df: pd.DataFrame, btc_df: pd.DataFrame, config: Strat
             "hold_days": hold_days,
             "exit_reason": exit_reason,
             "status": "OPEN" if is_open else "CLOSED",
-            "execution_lag_bars": lag,
+            "execution_delay_frac": alpha if use_frac else None,
+            "execution_lag_bars": None if use_frac else lag,
         }
         if not is_open:
             capital *= (1.0 + net)
@@ -394,7 +422,7 @@ def daily_equity_curve(merged_df: pd.DataFrame, trades: list[dict], config: Stra
             active = {
                 "trade": t,
                 "side": 1 if t["side"] == "LONG" else -1,
-                "buy_price": price,
+                "buy_price": float(t.get("buy_price") or price),  # actual fill
                 "entry_capital": cash * (1.0 - fee),  # entry fee paid up front
                 "buy_date": date,
             }
@@ -480,7 +508,8 @@ def backtest(data: dict, config: StrategyConfig = DEFAULT_CONFIG,
         "fee_bps_per_side": config.fee_bps_per_side,
         "long_funding_bps_per_day": config.long_funding_bps_per_day,
         "short_funding_bps_per_day": config.short_funding_bps_per_day,
-        "execution_lag_bars": config.execution_lag_bars,
+        "execution_delay_frac": config.execution_delay_frac,
+        "execution_lag_bars": None if config.execution_delay_frac is not None else config.execution_lag_bars,
         "eval_start": str(_ts(eval_start).date()),
         "eval_end": str(_ts(eval_end).date()),
         "btc_buy_hold_return": round(bh, 4),

@@ -135,15 +135,21 @@ def main():
         }
         for mode, df in results.items()
     }
+    max_grid = max(results[LONG_ONLY]["leverage"])
+
+    def kelly_str(mode):
+        k = recs[mode]["growth_optimal_leverage"]
+        return f"≥{k:.1f}x (grid edge — do not trust at n≈30)" if k >= max_grid else f"{k:.2f}x"
+
     rec_html = (
         '<div class="rec"><strong>Recommended leverage: '
         f'long-only {recs[LONG_ONLY]["recommended_leverage"]:.2f}x · '
         f'long/short {recs[LONG_SHORT]["recommended_leverage"]:.2f}x</strong><br>'
-        f'Growth-optimal (full Kelly): long-only {recs[LONG_ONLY]["growth_optimal_leverage"]:.2f}x, '
-        f'long/short {recs[LONG_SHORT]["growth_optimal_leverage"]:.2f}x. '
+        f'Growth-optimal (full Kelly): long-only {kelly_str(LONG_ONLY)}, '
+        f'long/short {kelly_str(LONG_SHORT)}. '
         f'Rule: {recs[LONG_ONLY]["rule"]}.</div>'
     )
-    page = PAGE.replace("__META__", f"Benchmark window: {TRAIN_END.date()} → {BENCHMARK_TEST_END.date()} · grid 0.5–6.0x · 10,000 bootstrap resamples")
+    page = PAGE.replace("__META__", f"Benchmark window: {TRAIN_END.date()} → {BENCHMARK_TEST_END.date()} · immediate execution · grid 0.5–6.0x · 10,000 bootstrap resamples")
     page = page.replace("__REC__", rec_html)
     page = page.replace("__TABLES__", tables)
     page = page.replace("__SWEEPS__", json.dumps(sweeps_js))

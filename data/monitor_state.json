@@ -1,0 +1,26 @@
+{
+  "last_bar": "2026-06-10",
+  "updated_at": "2026-06-10T08:29:07.329449+00:00",
+  "strategies": {
+    "long_only": {
+      "mode": "long_only",
+      "leverage": 3.0,
+      "position": "FLAT",
+      "entry_date": null,
+      "entry_price": null,
+      "action_today": "FLAT \u2014 no signal",
+      "actionable": false,
+      "slope_pct": 0.2459
+    },
+    "long_short": {
+      "mode": "long_short",
+      "leverage": 3.0,
+      "position": "FLAT",
+      "entry_date": null,
+      "entry_price": null,
+      "action_today": "FLAT \u2014 no signal",
+      "actionable": false,
+      "slope_pct": 0.2459
+    }
+  }
+}

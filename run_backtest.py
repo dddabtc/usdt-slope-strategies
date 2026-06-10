@@ -186,7 +186,16 @@ def write_index(results: dict, latest: str) -> None:
         card = card.replace("__LEV__", f"{results[mode]['config'].leverage:g}x")
         cards += card
 
-    cards += """<a href="visualization_open_search.html" class="card">
+    cards += """<a href="visualization_mechanism.html" class="card">
+  <h2>Mechanism Round · 机理优化空间</h2>
+  <div class="return mid">无规则空间</div>
+  <div class="stats">
+    <div class="stat"><span class="label">机理变体</span><br><span class="val">5/5 落败</span></div>
+    <div class="stat"><span class="label">事件响应</span><br><span class="val">即时+持续2周</span></div>
+    <div class="stat"><span class="label">剂量效应</span><br><span class="val">倒U形</span></div>
+  </div>
+</a>
+<a href="visualization_open_search.html" class="card">
   <h2>Open Search · 开放式最佳策略验证</h2>
   <div class="return">F3 wins</div>
   <div class="stats">

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>USDT Slope Strategies — Mechanism Round</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#0d1117; color:#c9d1d9; padding:12px; }
+h1 { font-size:17px; margin-bottom:6px; color:#58a6ff; line-height:1.3; }
+h2 { font-size:14px; margin:18px 0 8px; color:#8b949e; }
+.back { display:inline-block; font-size:13px; color:#8b949e; text-decoration:none; margin-bottom:10px; padding:4px 10px; background:#161b22; border:1px solid #30363d; border-radius:6px; }
+.back:active,.back:hover { color:#58a6ff; border-color:#58a6ff; }
+.meta { font-size:12px; color:#8b949e; margin-bottom:12px; }
+.notice { background:#211a0d; border:1px solid #9e6a03; color:#f0c674; padding:10px 12px; border-radius:8px; margin:10px 0 12px; font-size:12px; line-height:1.45; }
+.notice strong { color:#ffd866; }
+.rec { background:#0f2418; border:1px solid #238636; color:#7ee2a8; padding:10px 12px; border-radius:8px; margin:10px 0 12px; font-size:13px; line-height:1.55; }
+.rec strong { color:#3fb950; }
+table { width:100%; border-collapse:collapse; margin:8px 0 16px; font-size:12px; }
+th { background:#161b22; color:#8b949e; text-align:right; padding:6px 8px; border-bottom:1px solid #30363d; white-space:nowrap; }
+th:first-child,td:first-child { text-align:left; }
+td { padding:5px 8px; border-bottom:1px solid #21262d; text-align:right; }
+.pos { color:#3fb950; } .neg { color:#f85149; }
+@media (min-width:768px) { body { padding:20px; max-width:1100px; margin:0 auto; } h1 { font-size:22px; } }
+</style></head><body>
+<a class="back" href="index.html">← 返回总览 · All Strategies</a>
+<h1>Mechanism Round — is there interpretable room left in entries/exits?</h1>
+<div class="meta">Part A: descriptive mechanism studies (full history, 10k bootstraps) · Part B: 5 mechanism-motivated rule variants under the same nested walk-forward as the open search</div>
+<div class="rec"><strong>Verdict: no rule-shape room.</strong> All five mechanism-motivated changes — depth normalization,
+2-bar persistence, buy-the-lag, price-side exits, and capping the extreme percentile tail (post-hoc) — lose to the
+incumbent rules by 72–130pp of chained OOS return. The mechanism studies explain why: the response to USDT issuance is
+immediate AND persistent (~2 weeks), so immediate entry + flow-decay exits already match the shape. The remaining
+interpretable room is in <strong>data</strong> (exchange-deposit flows, funding absorption, real-time mint feeds), not in rule geometry.</div>
+<h2>A1 · Event study — BTC after a pct≥0.93 issuance burst (n=79, no confirm)</h2>
+<table><thead><tr><th>Horizon</th><th>After event</th><th>All-days base</th><th>Excess</th><th>90% CI (event)</th></tr></thead><tbody><tr><td>+1d</td><td class="pos">+0.82%</td><td>+0.13%</td><td class="pos">+0.69%</td><td>[+0.18, +1.45]</td></tr><tr><td>+2d</td><td class="pos">+1.24%</td><td>+0.26%</td><td class="pos">+0.98%</td><td>[+0.47, +2.04]</td></tr><tr><td>+3d</td><td class="pos">+1.61%</td><td>+0.39%</td><td class="pos">+1.22%</td><td>[+0.61, +2.61]</td></tr><tr><td>+5d</td><td class="pos">+1.93%</td><td>+0.65%</td><td class="pos">+1.28%</td><td>[+0.52, +3.43]</td></tr><tr><td>+7d</td><td class="pos">+2.65%</td><td>+0.93%</td><td class="pos">+1.71%</td><td>[+0.91, +4.49]</td></tr><tr><td>+10d</td><td class="pos">+2.94%</td><td>+1.37%</td><td class="pos">+1.57%</td><td>[+0.92, +4.98]</td></tr><tr><td>+14d</td><td class="pos">+4.07%</td><td>+1.97%</td><td class="pos">+2.10%</td><td>[+1.41, +6.83]</td></tr></tbody></table>
+<h2>A2 · Dose-response — forward 5d return by percentile bucket (inverted-U)</h2>
+<table><thead><tr><th>Bucket</th><th>n</th><th>Mean 5d</th><th>90% CI</th></tr></thead><tbody><tr><td>0.90–0.93</td><td>35</td><td class="pos">+1.58%</td><td>[+0.15, +3.01]</td></tr><tr><td>0.93–0.97</td><td>49</td><td class="pos">+2.91%</td><td>[+1.33, +4.59]</td></tr><tr><td>0.97–1.00</td><td>40</td><td class="pos">+1.67%</td><td>[-0.52, +3.89]</td></tr></tbody></table>
+<h2>A3 · Hold-day alpha — V27 entries held 14d (n=31): keeps accruing</h2>
+<table><thead><tr><th>Day in trade</th><th>Mean cum. return</th><th>90% CI</th></tr></thead><tbody><tr><td>day 1</td><td class="pos">+1.35%</td><td>[+0.33, +2.44]</td></tr><tr><td>day 3</td><td class="pos">+2.82%</td><td>[+1.13, +4.41]</td></tr><tr><td>day 5</td><td class="pos">+3.19%</td><td>[+1.04, +5.41]</td></tr><tr><td>day 7</td><td class="pos">+3.40%</td><td>[+0.75, +6.17]</td></tr><tr><td>day 10</td><td class="pos">+3.87%</td><td>[+0.78, +7.07]</td></tr><tr><td>day 14</td><td class="pos">+6.32%</td><td>[+1.04, +11.98]</td></tr></tbody></table>
+<h2>Part B · Mechanism variants vs F3 baseline (+174.8%, 8/8 folds positive)</h2>
+<table><thead><tr><th>Variant · mechanism</th><th>OOS return</th><th>Sharpe</th><th>Wins vs base</th><th>Δ return</th><th>Verdict</th></tr></thead><tbody><tr><td>M2_norm<br><span style="color:#8b949e;font-size:11px">相对斜率归一 · impact ∝ flow/depth</span></td><td>+44.4%</td><td>0.54</td><td>2/8</td><td class="neg">-130pp</td><td class="neg">REJECT</td></tr><tr><td>M3_persist<br><span style="color:#8b949e;font-size:11px">两连发确认 · sustained issuance</span></td><td>+81.6%</td><td>0.93</td><td>3/8</td><td class="neg">-93pp</td><td class="neg">NOTED</td></tr><tr><td>M4_catchup<br><span style="color:#8b949e;font-size:11px">买滞后 · repricing lag</span></td><td>+47.7%</td><td>0.53</td><td>2/8</td><td class="neg">-127pp</td><td class="neg">NOTED</td></tr><tr><td>M5_priceexit<br><span style="color:#8b949e;font-size:11px">价格侧出场 · absorption failure</span></td><td>+102.8%</td><td>0.92</td><td>2/8</td><td class="neg">-72pp</td><td class="neg">REJECT</td></tr><tr><td>M6_band（事后探索）<br><span style="color:#8b949e;font-size:11px">掐掉97分位以上尾部 · A2倒U</span></td><td>+77.4%</td><td>0.94</td><td>2/8</td><td class="neg">-97pp</td><td class="neg">REJECT</td></tr></tbody></table>
+<div class="notice"><strong>Reading:</strong> response lag peaks at k=0 with a k≈4 echo (high-percentile days corr +0.23) — both inside
+the strategy's typical 5–9 day hold. NOTED = the Part-A direction exists but is not exploitable net of frequency loss and costs.
+M6 was hypothesized after seeing A2 (labeled post-hoc) and failed anyway. Full artifacts in <code>experiments/mechanism-round/</code>.</div>
+</body></html>

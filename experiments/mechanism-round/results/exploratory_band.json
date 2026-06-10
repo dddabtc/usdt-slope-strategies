@@ -1,0 +1,78 @@
+{
+  "label": "EXPLORATORY_POST_HOC \u2014 do not ship without fresh-data confirmation",
+  "band": [
+    0.93,
+    0.97
+  ],
+  "aggregate": {
+    "total_return": 0.773558,
+    "daily_sharpe": 0.942126,
+    "max_drawdown": -0.137941,
+    "n_trades": 16,
+    "n_long": 16,
+    "n_short": 0,
+    "win_rate": 0.6875,
+    "avg_return_per_trade": 0.04025,
+    "avg_hold_days": 8.75
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "selected": "M6_regime_band0.93-0.97_trail10",
+      "oos_return": 0.2223,
+      "n_trades": 2,
+      "baseline_oos": 0.267
+    },
+    {
+      "fold": 2,
+      "selected": "M6_regime_band0.93-0.97_kalman75",
+      "oos_return": 0.0,
+      "n_trades": 0,
+      "baseline_oos": 0.0838
+    },
+    {
+      "fold": 3,
+      "selected": "M6_consec_band0.93-0.97_trail10",
+      "oos_return": 0.3479,
+      "n_trades": 5,
+      "baseline_oos": 0.1678
+    },
+    {
+      "fold": 4,
+      "selected": "M6_regime_band0.93-0.97_trail10",
+      "oos_return": 0.0019,
+      "n_trades": 2,
+      "baseline_oos": 0.1063
+    },
+    {
+      "fold": 5,
+      "selected": "M6_regime_band0.93-0.97_slope_peak",
+      "oos_return": 0.039,
+      "n_trades": 3,
+      "baseline_oos": 0.2845
+    },
+    {
+      "fold": 6,
+      "selected": "M6_regime_band0.93-0.97_trail10",
+      "oos_return": 0.093,
+      "n_trades": 1,
+      "baseline_oos": 0.1061
+    },
+    {
+      "fold": 7,
+      "selected": "M6_regime_band0.93-0.97_trail10",
+      "oos_return": -0.0977,
+      "n_trades": 1,
+      "baseline_oos": 0.0454
+    },
+    {
+      "fold": 8,
+      "selected": "M6_regime_band0.93-0.97_fixed3",
+      "oos_return": 0.0485,
+      "n_trades": 2,
+      "baseline_oos": 0.0431
+    }
+  ],
+  "folds_beating_baseline": 2,
+  "baseline_f3_total_return": 1.74831
+}

@@ -16,6 +16,7 @@ optimal value is derived from a liquidation-aware Kelly/bootstrap sweep.
 - [Long/Short](https://dddabtc.github.io/usdt-slope-strategies/visualization_long_short.html)
 - [Leverage Sweep → optimal leverage](https://dddabtc.github.io/usdt-slope-strategies/visualization_leverage.html)
 - [Open Strategy Search → which strategy is honestly best](https://dddabtc.github.io/usdt-slope-strategies/visualization_open_search.html)
+- [Mechanism Round → is there interpretable room left in the rules](https://dddabtc.github.io/usdt-slope-strategies/visualization_mechanism.html)
 
 ---
 
@@ -133,6 +134,21 @@ surrogate-null searches** (≈3× the best null; p = 1/13 ≈ 0.077, the floor a
 n=12). Shorts added nothing net of costs under honest selection. The frozen
 V27 long-only config shipped here is one member of the validated pattern
 (USDT slope event + top-decile percentile filter + BTC confirm + decay exit).
+
+## 4c. Mechanism round — any interpretable room left in the rules?
+
+Five mechanism-motivated rule changes (`experiments/mechanism-round/`), each
+with an explicit causal story, tested under the same nested walk-forward:
+depth normalization (−130pp vs baseline), 2-bar persistence (−93pp),
+buy-the-lag (−127pp), price-side exits (−72pp), and capping the extreme
+percentile tail (post-hoc, −97pp). **All five lose — the incumbent rules sit
+at a local optimum.** The descriptive studies explain why: the issuance
+response is immediate AND persistent (~2 weeks, with a k≈4 deployment echo),
+dose-response is inverted-U (93-97th percentile is the sweet spot), and
+per-trade alpha keeps accruing through day 14 — exactly the shape that
+immediate entry + flow-decay exits already harvest. Remaining interpretable
+room is in **data** (exchange-deposit flows, funding absorption, real-time
+mint feeds), not rule geometry.
 
 ## 5. Optimal leverage
 

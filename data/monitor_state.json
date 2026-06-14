@@ -1,6 +1,6 @@
 {
-  "last_bar": "2026-06-13",
-  "updated_at": "2026-06-13T00:11:23.271164+00:00",
+  "last_bar": "2026-06-14",
+  "updated_at": "2026-06-14T00:11:55.312134+00:00",
   "strategies": {
     "long_only": {
       "mode": "long_only",
@@ -10,7 +10,7 @@
       "entry_price": null,
       "action_today": "FLAT \u2014 no signal",
       "actionable": false,
-      "slope_pct": 0.4153
+      "slope_pct": 0.0792
     },
     "long_short": {
       "mode": "long_short",
@@ -20,7 +20,7 @@
       "entry_price": null,
       "action_today": "FLAT \u2014 no signal",
       "actionable": false,
-      "slope_pct": 0.4153
+      "slope_pct": 0.0792
     }
   }
 }

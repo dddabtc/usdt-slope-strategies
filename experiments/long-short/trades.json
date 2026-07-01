@@ -610,5 +610,22 @@
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
     "capital_after": 421303.99
+  },
+  {
+    "side": "SHORT",
+    "entry_signal_date": "2026-07-01",
+    "buy_date": "2026-07-01",
+    "exit_signal_date": "",
+    "sell_date": "",
+    "buy_price": 58550.75,
+    "sell_price": null,
+    "raw_return_pct": null,
+    "return_pct": null,
+    "hold_days": 0,
+    "exit_reason": "open",
+    "status": "OPEN",
+    "execution_delay_frac": 0.0,
+    "execution_lag_bars": null,
+    "capital_after": null
   }
 ]

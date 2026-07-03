@@ -226,4 +226,14 @@ maintenance margin, signal constants) lives in `StrategyConfig`
   approximation. Liquidation at high leverage can be worse in practice.
 - Funding is modeled flat (3 bps/day longs, 0 shorts); real funding varies
   and occasionally inverts.
+- **Upstream revision audit**: backtests assume the stored first-seen values
+  are what a live run saw. Every refresh re-downloads the last 365d and
+  compares settled rows (older than the 7-day heal window, on/after
+  2026-04-25) against the stored values; any mismatch is appended to
+  `data/revision_log.jsonl` and printed as a warning — stored values are
+  never rewritten. First audit (2026-07-03): zero revisions across all five
+  series for every row this pipeline wrote itself. Rows on/before 2026-04-24
+  came from the research repo's old downloader (intraday mean, ≈ one-day-later
+  label vs the 00:00 snapshot) and are excluded — a known era seam, not
+  upstream revisions.
 - Not financial advice.

@@ -638,7 +638,7 @@
     "sell_price": null,
     "raw_return_pct": null,
     "return_pct": null,
-    "hold_days": 3,
+    "hold_days": 4,
     "exit_reason": "open",
     "status": "OPEN",
     "execution_delay_frac": 0.0,

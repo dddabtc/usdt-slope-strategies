@@ -1,6 +1,6 @@
 {
-  "last_bar": "2026-08-07",
-  "updated_at": "2026-08-07T00:11:22.216350+00:00",
+  "last_bar": "2026-08-08",
+  "updated_at": "2026-08-08T00:11:06.653844+00:00",
   "strategies": {
     "long_only": {
       "mode": "long_only",
@@ -10,7 +10,7 @@
       "entry_price": null,
       "action_today": "FLAT \u2014 no signal",
       "actionable": false,
-      "slope_pct": 0.7623
+      "slope_pct": 0.7923
     },
     "long_short": {
       "mode": "long_short",
@@ -18,9 +18,9 @@
       "position": "FLAT",
       "entry_date": null,
       "entry_price": null,
-      "action_today": "EXIT SHORT NOW (slope_positive) @ ~$64,263, trade -7.3% net @3x",
-      "actionable": true,
-      "slope_pct": 0.7623
+      "action_today": "FLAT \u2014 no signal",
+      "actionable": false,
+      "slope_pct": 0.7923
     }
   }
 }

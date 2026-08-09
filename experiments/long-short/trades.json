@@ -635,14 +635,14 @@
     "exit_signal_date": "2026-08-07",
     "sell_date": "2026-08-07",
     "buy_price": 62802.63,
-    "sell_price": 64262.75,
-    "raw_return_pct": 2.32,
-    "return_pct": -7.27,
+    "sell_price": 64289.46,
+    "raw_return_pct": 2.37,
+    "return_pct": -7.4,
     "hold_days": 5,
     "exit_reason": "slope_positive",
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 298539.52
+    "capital_after": 298128.67
   }
 ]

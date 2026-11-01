@@ -1,6 +1,6 @@
 {
-  "last_bar": "2026-10-31",
-  "updated_at": "2026-10-31T00:11:44.893103+00:00",
+  "last_bar": "2026-11-01",
+  "updated_at": "2026-11-01T00:12:47.939421+00:00",
   "strategies": {
     "long_only": {
       "mode": "long_only",
@@ -10,7 +10,7 @@
       "entry_price": null,
       "action_today": "FLAT \u2014 no signal",
       "actionable": false,
-      "slope_pct": 0.0164
+      "slope_pct": 0.041
     },
     "long_short": {
       "mode": "long_short",
@@ -18,9 +18,9 @@
       "position": "SHORT",
       "entry_date": "2026-10-30",
       "entry_price": 77838.81,
-      "action_today": "HOLD SHORT since 2026-10-30 (raw +0.8%, +2.4% @3x)",
+      "action_today": "HOLD SHORT since 2026-10-30 (raw +0.5%, +1.4% @3x)",
       "actionable": false,
-      "slope_pct": 0.0164
+      "slope_pct": 0.041
     }
   }
 }

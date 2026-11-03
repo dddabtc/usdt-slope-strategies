@@ -649,17 +649,17 @@
     "side": "SHORT",
     "entry_signal_date": "2026-10-30",
     "buy_date": "2026-10-30",
-    "exit_signal_date": "",
-    "sell_date": "",
+    "exit_signal_date": "2026-11-03",
+    "sell_date": "2026-11-03",
     "buy_price": 77838.81,
-    "sell_price": null,
-    "raw_return_pct": null,
-    "return_pct": null,
-    "hold_days": 3,
-    "exit_reason": "open",
-    "status": "OPEN",
+    "sell_price": 76592.81,
+    "raw_return_pct": -1.6,
+    "return_pct": 4.5,
+    "hold_days": 4,
+    "exit_reason": "slope_trough_recovery",
+    "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": null
+    "capital_after": 311551.22
   }
 ]

@@ -669,14 +669,31 @@
     "exit_signal_date": "2026-11-10",
     "sell_date": "2026-11-10",
     "buy_price": 77384.59,
-    "sell_price": 75324.65,
-    "raw_return_pct": -2.66,
-    "return_pct": 7.69,
+    "sell_price": 75266.77,
+    "raw_return_pct": -2.74,
+    "return_pct": 7.91,
     "hold_days": 6,
     "exit_reason": "slope_positive",
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 334053.86
+    "capital_after": 334749.95
+  },
+  {
+    "side": "SHORT",
+    "entry_signal_date": "2026-11-12",
+    "buy_date": "2026-11-12",
+    "exit_signal_date": "",
+    "sell_date": "",
+    "buy_price": 73842.43,
+    "sell_price": null,
+    "raw_return_pct": null,
+    "return_pct": null,
+    "hold_days": 0,
+    "exit_reason": "open",
+    "status": "OPEN",
+    "execution_delay_frac": 0.0,
+    "execution_lag_bars": null,
+    "capital_after": null
   }
 ]

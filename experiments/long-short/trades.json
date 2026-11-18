@@ -686,14 +686,14 @@
     "exit_signal_date": "2026-11-16",
     "sell_date": "2026-11-16",
     "buy_price": 73974.39,
-    "sell_price": 65213.41,
-    "raw_return_pct": -11.84,
-    "return_pct": 35.23,
+    "sell_price": 65305.28,
+    "raw_return_pct": -11.72,
+    "return_pct": 34.86,
     "hold_days": 4,
     "exit_reason": "slope_positive",
     "status": "CLOSED",
     "execution_delay_frac": 0.0,
     "execution_lag_bars": null,
-    "capital_after": 452681.7
+    "capital_after": 451434.45
   }
 ]
